@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -32,8 +33,10 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.text.DateFormat;
@@ -79,10 +82,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        stopLocationUpdatesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                stopLocationUpdates();
+            }
+        });
+
         buildLocationRequest();
         buildLocationCallBack();
         buildLocationSettingsRequest();
 
+    }
+
+    private void stopLocationUpdates() {
+
+        if (!isLocationUpdatesActive) {
+            return;
+        }
+
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+                .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        isLocationUpdatesActive = false;
+                        startLocationUpdatesButton.setEnabled(true);
+                        stopLocationUpdatesButton.setEnabled(false);
+                    }
+                });
     }
 
     private void startLocationUpdates() {
@@ -172,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
 
@@ -213,6 +241,12 @@ public class MainActivity extends AppCompatActivity {
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(locationRequest);
         locationSettingsRequest = builder.build();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
     }
 
     @Override
@@ -270,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
                 Snackbar.LENGTH_INDEFINITE).setAction(action, listener).show();
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
