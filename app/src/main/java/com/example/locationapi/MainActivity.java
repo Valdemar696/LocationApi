@@ -199,9 +199,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateLocationUi() {
-        locationTextView.setText(" " + currentLocation.getLatitude() + "/" +
-                currentLocation.getLatitude());
-        locationUpdateTimeTextView.setText(DateFormat.getTimeInstance().format(new Date()));
+
+        if(currentLocation != null) {
+            locationTextView.setText(" " + currentLocation.getLatitude() + "/" +
+                    currentLocation.getLatitude());
+            locationUpdateTimeTextView.setText(DateFormat.getTimeInstance().format(new Date()));
+        }
 
     }
 
@@ -262,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
             View.OnClickListener listener) {
 
         Snackbar.make(
-                findViewById(R.id.content),
+                findViewById(android.R.id.content),
                 mainText,
                 Snackbar.LENGTH_INDEFINITE).setAction(action, listener).show();
     }
